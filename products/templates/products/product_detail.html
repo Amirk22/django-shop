@@ -1,0 +1,420 @@
+{% extends 'base.html' %}
+{% load custom_filters %}
+{% load thumbnail %}
+{% block title %}detail{% endblock %}
+{% block content %}
+<style>
+#galleryPopup {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.7);
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+
+#galleryBox {
+    position: relative;
+    background: #fff;
+    border-radius: 12px;
+    padding: 10px;
+    width: 500px;
+    height: 500px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+
+#galleryImage {
+    max-width: 100%;
+    max-height: 100%;
+    border-radius: 10px;
+}
+
+
+#closePopup {
+    position: absolute;
+    top: 5px;
+    right: 10px;
+    background: crimson;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+
+.navBtn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0,0,0,0.5);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    font-size: 22px;
+    cursor: pointer;
+}
+
+textarea {
+    resize: none;
+    overflow: auto;
+}
+#prevBtn { left: 10px; }
+#nextBtn { right: 10px; }
+.desc {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    transition: .3s;
+}
+
+.desc.expanded {
+    -webkit-line-clamp: unset;
+}
+.toggle-btn {
+    color: blue;
+    cursor: pointer;
+    font-size: 14px;
+}
+</style>
+      <div class="container">
+         <div class="row">
+            <div class="col-md-12">
+               <div class="single-box">
+                  <div class="row">
+                     <div class="col-md-7">
+                        <h4 class="text-dark">{{ product.title }}</h4>
+                        <hr>
+                        <div class="row">
+                           <div class="col-md-7">
+                              <div class="single-content-right">
+                                <div class="container text-end">
+                                  <div class="row mb-2">
+                                    <div class="col-md-6">
+                                      <strong>دسته‌بندی:</strong>
+                                      <a href="{% url 'product_list' category_slug=product.category.parent.slug subcategory_slug=product.category.slug %}"
+                                         class="text-primary text-decoration-none">{{ product.category }}</a>
+                                    </div>
+                                    {% if product.brand %}
+                                    <div class="col-md-6">
+                                      <strong>برند:</strong>
+                                      <a href="{% url 'product_list_brand' brand_slug=product.brand.slug %}"
+                                         class="text-primary text-decoration-none">{{ product.brand }}</a>
+                                    </div>
+                                    {% endif %}
+                                  </div>
+                                  <div class="row mb-2">
+                                      {% if product.color %}
+                                    <div class="col-md-6">
+                                      <strong>رنگ:</strong>
+                                      <span class="text-secondary">{{ product.color }}</span>
+                                    </div>
+                                      {% endif %}
+                                    <div class="col-md-6">
+                                      <strong>موجودی:</strong>
+                                      <span class="text-secondary">{{ product.inventory }}</span>
+                                    </div>
+                                  </div>
+                                <div class="row mb-2">
+                                    <div class="col-md-6">
+                                      <strong>تعداد نظرات :</strong>
+                                      <span class="text-secondary">{{ total_comments }}</span>
+                                    </div>
+                                  </div>
+                                </div>
+                                 <br>
+                              </div>
+                           </div>
+                        </div>
+                        <hr>
+
+                        {% if product.has_discount %}
+                            <h3>
+                                <span style="text-decoration: line-through;">{{ product.price|price_format }} تومان</span>
+                                <strong class="f-dark text-danger">{{ product.final_price|price_format }} تومان</strong>
+                            </h3>
+                        {% else %}
+                            <h3 class="f-dark text-danger">{{ product.price|price_format }} تومان</h3>
+                        {% endif %}
+                        <div  class="d-flex justify-content-center">
+                            {% if user.is_authenticated %}
+                                {% if cart_item and cart_item.quantity > 0 %}
+                                    <form action="{% url 'cart' %}" method="post">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-secondary">
+                                            <i class="fa fa-cart-plus"></i> به سبد اضافه شده
+                                        </button>
+                                    </form>
+                                {% else %}
+                                    <form action="{% url 'cart_add' product.id %}" method="post">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fa fa-cart-plus"></i> افزودن به سبد
+                                        </button>
+                                    </form>
+                                {% endif %}
+                            {% else %}
+                                <a href="javascript:void(0)" onclick="showPopup()" class="btn btn-primary">
+                                    <i class="fa fa-cart-plus"></i> افزودن به سبد
+                                </a>
+                            {% endif %}
+                        </div>
+                     <div class="pt-5">
+                         <strong>توضیحات :</strong>
+                         <span id="desc" class="desc text-secondary">
+                            {{ product.description }}
+                         </span>
+                         <a id="toggleBtn" class="toggle-btn" href="javascript:void(0)">بیشتر ></a>
+                     </div>
+                     </div>
+                     <div class="col-md-5">
+                        <div class="single-img">
+                            <figure>
+                                <a href="{{ product.image.url }}" data-gallery-image>
+                                    <img src="{{ product.image.url }}" class="w-100 s-img">
+                                </a>
+                            </figure>
+                        </div>
+
+                        <div class="single-img-slider">
+                            <div class="owl-carousel owl-theme ov-single">
+                                {% for g in gallery %}
+                                    <a href="{{ g.image.url }}" data-gallery-image>
+                                        <img src="{{ g.image.url }}" class="w-100">
+                                    </a>
+                                {% endfor %}
+                            </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </div>
+      <!---------------------------------->  
+      <div class="container">
+         <span class="releated-products">محصولات مرتبط</span>
+         <hr>
+         <div class="row">
+            <div class="col-md-12">
+               <div class="single-two-slider">
+                  <div class="owl-carousel owl-theme ov-single-two">
+                      {% for product in products %}
+                        <div class="item">
+                            <a href="{% url 'product_detail' category_slug=product.category.parent.slug subcategory_slug=product.category.slug pk=product.pk %}">
+                                <figure>
+                                    {% thumbnail product.image "225x225" crop="center" as im %}
+                                        <img src="{{ im.url }}">
+                                    {% endthumbnail %}
+                                </figure>
+                            </a>
+                            <div class="title-limit-wrapper">
+                                <h6 class="title-limit"><i class="fa fa-title"></i>{{ product.title}}</h6>
+                            </div>
+                            {% if product.has_discount %}
+                                <h6>
+                                    <span style="text-decoration: line-through;">{{ product.price|price_format }} تومان</span>
+                                    <strong class="f-dark text-danger">{{ product.final_price|price_format }} تومان</strong>
+                                </h6>
+                            {% else %}
+                                <h6 class="f-dark text-danger">{{ product.price|price_format }} تومان</h6>
+                            {% endif %}
+                        </div>
+                      {% endfor %}
+                  </div>
+               </div>
+            </div>
+         </div>
+      </div>
+    <hr>
+      <!---------------------------------->  
+<div class="container mt-4">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+    {% if user.is_authenticated %}
+      <div class="card shadow-sm mb-4">
+        <div class="card-body">
+          <h5 class="card-title mb-3 text-center">ثبت نظر</h5>
+          <form method="post">
+            {% csrf_token %}
+            <div class="mb-3">
+              {{ comment_form.name }}
+            </div>
+            <div class="mb-3">
+              {{ comment_form.massage }}
+            </div>
+            <div class="d-flex justify-content-end">
+              <button type="submit" name="comment_submit" class="btn btn-primary">ارسال</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    {% else %}
+        <div class="card shadow-sm mb-4">
+        <div class="card-body">
+          <h5 class="card-title mb-3 text-center">ثبت نظر</h5>
+          <h6 class="card-title mb-3 text-center">برای ثبت نظر ابتدا باید وارد حساب خود شوید</h6>
+        </div>
+      </div>
+    {% endif %}
+      {% for comment in comments %}
+      <div class="card shadow-sm mb-3">
+        <div class="card-body">
+          <h6 class="card-title">{{ comment.name }}</h6>
+          <p class="card-text">{{ comment.massage }}</p>
+
+        {% if user.is_authenticated %}
+          <div class="text-start mb-2">
+            <button class="btn btn-success btn-sm" onclick="toggleReplyForm(this)">پاسخ</button>
+          </div>
+        {% else %}
+            <div class="text-start mb-2">
+            <button class="btn btn-success btn-sm" onclick="showPopup()">پاسخ</button>
+          </div>
+        {% endif %}
+        {% if user.is_authenticated %}
+          <div class="reply-form mt-3 d-none">
+            <div class="card mx-auto" style="max-width: 95%;">
+                <div class="card-body position-relative">
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-2">
+                            <div class="mb-3">
+                                {{ commentreply_form.name }}
+                            </div>
+                            {{ commentreply_form.massage }}
+                            <input type="hidden" name="comment_id" value="{{ comment.id }}">
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <button type="button" style="background: none; border: none; color: red; font-weight: bold; font-size: 1.2rem; line-height: 1;" onclick="closeReplyForm(this)">&times;</button>
+                            <button type="submit" name="reply_submit" class="btn btn-primary btn-sm">ارسال</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+          </div>
+        {% endif %}
+
+        </div>
+
+      </div>
+
+            {% for reply in commentreplies %}
+                {% if reply.comment_id == comment.id %}
+                    <div class="card shadow-sm ms-4 mt-1 mb-3" style="max-width: 95%;">
+                        <div class="card-body">
+                            <h6 class="card-title">{{ reply.name }}</h6>
+                            <p class="card-text">{{ reply.massage }}</p>
+                        </div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+      {% endfor %}
+
+    </div>
+  </div>
+</div>
+<br>
+<br>
+<br>
+<br>
+
+    <div id="galleryPopup">
+    <div id="galleryBox">
+        <button id="closePopup">&times;</button>
+        <button class="navBtn" id="prevBtn">&#10094;</button>
+        <img id="galleryImage" src="" alt="Gallery Image">
+        <button class="navBtn" id="nextBtn">&#10095;</button>
+    </div>
+</div>
+
+<script>
+const popup = document.getElementById("galleryPopup");
+const img = document.getElementById("galleryImage");
+const closeBtn = document.getElementById("closePopup");
+const prevBtn = document.getElementById("prevBtn");
+const nextBtn = document.getElementById("nextBtn");
+
+let images = [];
+let currentIndex = 0;
+
+document.querySelectorAll('[data-gallery-image]').forEach((el, i) => {
+    el.addEventListener('click', e => {
+        e.preventDefault();
+        images = Array.from(document.querySelectorAll('[data-gallery-image]')).map(img => img.href);
+        currentIndex = i;
+        showImage(currentIndex);
+        popup.style.display = "flex";
+    });
+});
+
+
+function showImage(index) {
+    img.src = images[index];
+}
+
+
+closeBtn.onclick = () => popup.style.display = "none";
+
+
+prevBtn.onclick = () => {
+    currentIndex = (currentIndex - 1 + images.length) % images.length;
+    showImage(currentIndex);
+};
+nextBtn.onclick = () => {
+    currentIndex = (currentIndex + 1) % images.length;
+    showImage(currentIndex);
+};
+
+
+popup.addEventListener("click", e => {
+    if (e.target === popup) popup.style.display = "none";
+});
+
+
+
+function toggleReplyForm(btn) {
+const form = btn.closest('.card-body').querySelector('.reply-form');
+form.classList.toggle('d-none');
+}
+
+
+function closeReplyForm(btn) {
+const form = btn.closest('.reply-form');
+form.classList.add('d-none');
+}
+
+
+function submitReply(btn) {
+const form = btn.closest('.reply-form');
+
+form.classList.add('d-none');
+alert('پاسخ ارسال شد!');
+}
+
+const desc = document.getElementById("desc");
+const toggleBtn = document.getElementById("toggleBtn");
+
+toggleBtn.addEventListener("click", () => {
+    desc.classList.toggle("expanded");
+
+    if (desc.classList.contains("expanded")) {
+        toggleBtn.textContent = "بستن >";
+    } else {
+        toggleBtn.textContent = "بیشتر >";
+    }
+});
+</script>
+
+{% endblock %}

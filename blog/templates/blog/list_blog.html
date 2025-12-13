@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+{% load thumbnail %}
+{% block title %} مقالات {% endblock %}
+
+{% block content %}
+    <div class="pages-bnaer text-center">
+         <div class="container">
+            <span>اخبار و مقالات</span>
+         </div>
+      </div>
+<style>
+  #filter-results {
+    background: #fdfdfd;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    border: 1px solid #eaeaea;
+    border-radius: 12px;
+  }
+
+  #filter-results h5 {
+    font-weight: 600;
+    color: #333;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 8px;
+  }
+
+  #filter-results .form-label {
+    font-size: 0.9rem;
+    color: #555;
+    margin-bottom: 4px;
+  }
+
+  #filter-results .form-select {
+    border-radius: 10px;
+    border: 1px solid #ddd;
+    transition: all 0.2s ease;
+  }
+
+  #filter-results .form-select:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0,123,255,0.2);
+  }
+
+  #filter-results button {
+    border-radius: 10px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+  }
+
+  #filter-results button:hover {
+    background-color: #0069d9;
+    transform: translateY(-1px);
+  }
+  #filter-results .row.g-3 > .col {
+  display: flex;
+  flex-direction: column;
+}
+
+#filter-results .form-select {
+  flex: 1;
+  height: 42px;
+  min-width: 0;
+}
+</style>
+
+<form id="filter-results" action="#" method="get" class="p-3 mt-3">
+  <h5 class="mb-3">فیلتر براساس</h5>
+
+  <div class="row g-3 align-items-end">
+    <div class="col-md-8">
+      <div class="row g-3">
+
+        <div class="col">
+          <label for="result_country" class="form-label">دسته‌بندی</label>
+          <select name="category" id="result_country" class="form-select">
+            <option value="all" {% if request.GET.category == "all" or not request.GET.category %}selected{% endif %}>همه</option>
+            {% for category in categories %}
+                <option value="{{ category.title }}" {% if request.GET.category == category.title %}selected{% endif %}>{{ category.title }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="col">
+          <label for="result_sortby" class="form-label">مرتب‌سازی</label>
+          <select name="sort" id="result_sortby" class="form-select">
+            <option value="imdb_rate" {% if request.GET.sort == "imdb_rate" or not request.GET.sort %}selected{% endif %}>همه</option>
+            <option value="newest" {% if request.GET.sort == "newest" %}selected{% endif %}>جدیدترین</option>
+            <option value="oldest" {% if request.GET.sort == "oldest" %}selected{% endif %}>قدیمی‌ترین</option>
+          </select>
+        </div>
+
+        <div class="col">
+          <label for="result_genre" class="form-label">نویسنده</label>
+         <select name="author" id="result_genre" class="form-select">
+            <option value="all" {% if request.GET.author == "all" or not request.GET.author %}selected{% endif %}>همه</option>
+            {% for author in authors %}
+                <option value="{{ author }}" {% if request.GET.author == author %}selected{% endif %}>{{ author }}</option>
+            {% endfor %}
+        </select>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="col-md-4 text-md-end text-center">
+      <button type="submit" class="btn btn-primary px-5 py-2 mt-2 w-100 w-md-auto">
+        جستجو
+      </button>
+    </div>
+  </div>
+</form>
+
+
+
+    <br>
+    <br>
+
+    <div class="container">
+  <div class="row">
+  {% if blogs %}
+    {% for blog in blogs %}
+      <div class="col-md-3 mb-4">
+        <div class="blog-content p-3 shadow-sm rounded h-100 d-flex flex-column">
+          <figure>
+            {% thumbnail blog.image "300x150" crop="center" as im %}
+              <img class="img-fluid rounded" src="{{ im.url }}">
+            {% endthumbnail %}
+          </figure>
+          <h6 class="mt-2"><i class="fa fa-title"></i> {{ blog.title }}</h6>
+          <p>{{ blog.short_description}}</p>
+          <ul class="list-unstyled small">
+            <li><i class="fa fa-bars"></i> دسته بندی: {{ blog.category }}</li>
+            <li><i class="fa fa-calendar-o"></i> نوشته شده در: {{ blog.created_at }}</li>
+            <li><i class="fa fa-user-o"></i> نویسنده: {{ blog.author.username }}</li>
+          </ul>
+          <a href="{% url 'blog_detail' blog.id %}" class="btn btn-primary btn-sm mt-auto"><i class="fa fa-continuous mt-auto"></i> ادامه مطلب »</a>
+        </div>
+      </div>
+    {% endfor %}
+  {% else %}
+ <div class="col-12 mb-4">
+    <h2 class="text-center">هیچ مقاله ای یافت نشد</h2>
+</div>
+
+  {% endif %}
+  </div>
+</div>
+{% endblock %}

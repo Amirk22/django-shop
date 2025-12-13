@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% load custom_filters %}
+{% load thumbnail %}
+{% block content %}
+
+
+	<div class="pages-bnaer text-center">
+         <div class="container">
+             <h3>{{brand.title }}</h3>
+         </div>
+      </div>
+    <div class="container">
+         <div class="row">
+             {% if results %}
+                 {% for result in results %}
+                    <div class="col-md-3">
+                     <div class="">
+                       <a href="{% url 'product_detail' category_slug=result.category.parent.slug subcategory_slug=result.category.slug pk=result.pk %}">
+                        <figure>
+                            {% thumbnail result.image "225x225" crop="center" as im %}
+                                <img src="{{ im.url }}">
+                            {% endthumbnail %}
+                        </figure>
+                       </a>
+                        <div class="title-limit-wrapper">
+                            <h5 class="title-limit"><i class="fa fa-title"></i>{{ result.title}}</h5>
+                        </div>
+                        {% if result.has_discount %}
+                            <h6>
+                                <span style="text-decoration: line-through;">{{ result.price|price_format }} تومان</span>
+                                <strong class="f-dark text-danger">{{ result.final_price|price_format }} تومان</strong>
+                            </h6>
+                        {% else %}
+                            <h6 class="f-dark text-danger">{{ result.price|price_format }} تومان</h6>
+                        {% endif %}
+                     </div>
+                    </div>
+                {% endfor %}
+             {% else %}
+                 <h5>محصولی یافت نشد</h5>
+             {% endif %}
+
+         </div>
+      </div>
+    <br>
+
+{% endblock %}

@@ -1,0 +1,58 @@
+services:
+  redis:
+    image: redis:7.0.11-alpine
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: postgres
+    environment:
+      POSTGRES_DB: shopping
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123456
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  django:
+    image: django
+    container_name: django
+    build:
+      context: .
+    command: >
+      sh -c "
+        python manage.py makemigrations || echo 'No migrations to make';
+        until python manage.py migrate; do
+          echo 'Waiting for database...'
+          sleep 5
+        done
+        python manage.py loaddata /app/data.json || echo 'Data already loaded'
+        python manage.py runserver 0.0.0.0:8000
+      "
+    
+
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - redis
+      - postgres
+
+
+
+  celery:
+    image: celery
+    container_name: celery
+    build:
+      context: .
+    command: celery -A config worker -l info
+    volumes:
+      - .:/app
+    depends_on:
+      - redis
+      - django
+      - postgres
+
+volumes:
+  postgres_data:

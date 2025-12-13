@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block title %}ثبت نام{% endblock %}
+
+{% block content %}
+
+<div style="max-width:400px; margin:100px auto; background:#fff; padding:30px; border-radius:16px; box-shadow:0 0 10px rgba(0,0,0,0.1);">
+    <div style="text-align:center; font-weight:bold; font-size:22px; margin-bottom:20px;">ثبت‌نام</div>
+
+    <form method="post" novalidate>
+        {% csrf_token %}
+
+        <!-- ایمیل -->
+        <div class="mb-3">
+            {{ register_form.email }}
+            {% for error in register_form.email.errors %}
+                <div style="color:red; font-size:13px; margin-top:4px;">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <div class="mb-3">
+            {{ register_form.password }}
+            {% for error in register_form.password.errors %}
+                <div style="color:red; font-size:13px; margin-top:4px;">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <div class="mb-3">
+            {{ register_form.confirm_password }}
+            {% for error in register_form.confirm_password.errors %}
+                <div style="color:red; font-size:13px; margin-top:4px;">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        {% for error in register_form.non_field_errors %}
+            <div style="color:red; font-size:14px; margin:6px 0; text-align:center;">{{ error }}</div>
+        {% endfor %}
+
+        <button type="submit" class="btn btn-primary w-100"
+                style="border-radius:8px; font-size:16px; padding:10px 0;">
+            ثبت‌نام
+        </button>
+    </form>
+</div>
+{% endblock %}

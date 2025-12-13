@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block title %}تماس با ما{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+  <div class="row justify-content-center">
+    <div class="col-sm-12 col-md-6 col-lg-5">
+      <div class="p-4 shadow rounded bg-light">
+        <h2 class="text-center mb-4">تماس با ما</h2>
+
+        <form method="post" action="{% url 'contact_us' %}" id="contact-form">
+          {% csrf_token %}
+
+          <div class="mb-3">
+            {{ contact_form.name }}
+          </div>
+
+          <div class="mb-3">
+            {{ contact_form.email }}
+          </div>
+
+          <div class="mb-3">
+            {{ contact_form.subject }}
+          </div>
+
+          <div class="mb-3">
+            {{ contact_form.message }}
+          </div>
+
+          <button type="submit" class="btn btn-primary w-100">
+            ارسال
+          </button>
+
+          {% if error %}
+            <div class="alert alert-danger mt-3">{{ error }}</div>
+          {% endif %}
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

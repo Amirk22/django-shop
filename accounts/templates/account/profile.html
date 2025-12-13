@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block title %}پروفایل{% endblock %}
+
+{% block content %}
+<div style="max-width:400px; margin:100px auto; background:#fff; padding:30px; border-radius:16px; box-shadow:0 0 15px rgba(0,0,0,0.1); text-align:center; font-family:sans-serif;">
+
+    <div style="font-size:22px; font-weight:bold; margin-bottom:20px;">پروفایل کاربری</div>
+
+    <div style="margin-bottom:25px; font-size:16px; color:#333;">
+        ایمیل شما: <span style="font-weight:600;">{{ user.email }}</span>
+    </div>
+
+    <form method="post" action="{% url 'logout' %}">
+        {% csrf_token %}
+        <button type="submit"
+                style="width:100%; padding:10px 0; font-size:16px; border-radius:8px; border:none; background:#dc3545; color:white; cursor:pointer;">
+            خروج از حساب
+        </button>
+    </form>
+</div>
+{% endblock %}

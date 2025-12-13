@@ -1,0 +1,361 @@
+{% extends 'base.html' %}
+{% load thumbnail %}
+{% load custom_filters %}
+
+
+{% block content %}
+	<body>
+<div class="container-fluid pb-5">
+  <div class="row">
+    <div class="col-12 p-0">
+      <div id="carouselExampleIndicators" class="carousel slide" {% if sliders|length > 1 %} data-ride="carousel"{% endif %}>
+        {% if sliders|length > 1 %}
+        <ol class="carousel-indicators">
+          {% for slider in sliders %}
+          <li data-target="#carouselExampleIndicators" data-slide-to="{{ forloop.counter0 }}" class="{% if forloop.first %}active{% endif %}"></li>
+          {% endfor %}
+        </ol>
+        {% endif %}
+        <div class="carousel-inner">
+          {% for slider in sliders %}
+          <div class="carousel-item {% if forloop.first %}active{% endif %}">
+            <img src="{{ slider.image.url }}" class="img-fluid d-block w-100" alt="">
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!---------------------------------->
+
+<div class="brand-carousel-container position-relative w-100 mx-auto" style="padding:0 50px;">
+  <div class="brand-carousel-wrapper overflow-hidden">
+    <ul class="brand-carousel d-flex list-unstyled m-0 p-0">
+      {% for brand in brands %}
+      {% if brand.image %}
+      <li class="brand-item text-center flex-shrink-0 mx-2">
+        <a href="{% url 'product_list_brand' brand_slug=brand.slug %}">
+          {% thumbnail brand.image '500x500' crop="center" as im %}
+          <img class="rounded-circle" src="{{ im.url }}" width="60px">
+          {% endthumbnail %}
+          <p>{{ brand.title }}</p>
+        </a>
+      </li>
+      {% endif %}
+      {% endfor %}
+    </ul>
+  </div>
+  <button id="leftBtn" class="btn carousel-btn left-btn">&#8592;</button>
+  <button id="rightBtn" class="btn carousel-btn right-btn">&#8594;</button>
+</div>
+
+<style>
+.brand-carousel-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  direction: rtl;
+  scroll-behavior: smooth;
+}
+
+.brand-carousel {
+  display: flex;
+}
+
+.brand-item {
+  flex-shrink: 0;
+  width: 100px;
+  margin: 0 8px;
+}
+
+.carousel-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: black;
+  color: white;
+  border: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+.left-btn { left: 10px; }
+.right-btn { right: 10px; }
+</style>
+
+<script>
+const wrapper = document.querySelector('.brand-carousel-wrapper');
+const leftBtn = document.getElementById('leftBtn');
+const rightBtn = document.getElementById('rightBtn');
+
+
+const item = document.querySelector('.brand-item');
+const style = getComputedStyle(item);
+const itemWidth = item.offsetWidth + parseInt(style.marginLeft) + parseInt(style.marginRight);
+
+
+window.addEventListener('load', () => {
+  wrapper.scrollLeft = wrapper.scrollWidth;
+  updateButtons();
+});
+
+
+function updateButtons() {
+  const maxScroll = wrapper.scrollWidth - wrapper.clientWidth;
+  const currentScroll = Math.abs(wrapper.scrollLeft);
+
+
+  if (currentScroll < 5) {
+    rightBtn.style.display = 'none';
+  } else {
+    rightBtn.style.display = 'block';
+  }
+
+
+  if (currentScroll >= maxScroll - 5) {
+    leftBtn.style.display = 'none';
+  } else {
+    leftBtn.style.display = 'block';
+  }
+}
+
+
+leftBtn.addEventListener('click', () => {
+  wrapper.scrollBy({ left: -itemWidth, behavior: 'smooth' });
+  setTimeout(updateButtons, 350);
+});
+
+
+rightBtn.addEventListener('click', () => {
+  wrapper.scrollBy({ left: itemWidth, behavior: 'smooth' });
+  setTimeout(updateButtons, 350);
+});
+
+
+wrapper.addEventListener('scroll', () => {
+  updateButtons();
+});
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+      <!---------------------------------->
+<div class="container">
+    <div class="row">
+        <div class="col-md-3">
+            <div class="coopen">
+                {% if banner1 %}
+                    <a href="{{ banner1.url }}">
+                        <img src="{{ banner1.image.url }}" alt="{{ banner1.title }}">
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="col-md-9">
+            <div class="row vizheh">
+                <div class="col-md-4">
+                    <div class="vizheh-img">
+                <a href="{% url 'product_detail' category_slug=single_product.category.parent.slug subcategory_slug=single_product.category.slug pk=single_product.pk %}">
+                        {% thumbnail single_product.image '600x600' crop="center" as im %}
+                            <img src="{{ im.url }}">
+                        {% endthumbnail %}
+                </a>
+                    </div>
+                </div>
+                <div class="col-md-8">
+                    <div class="vizheh-content">
+                        <div><del>{{ single_product.price|price_format }} تومان</del></div>
+                        <h4>{{ single_product.discount_price|price_format }} تومان</h4>
+                        <div class="title-limit-wrapper">
+                            <h3 class="title-limit"><i class="fa fa-title"></i>{{ single_product.title }}</h3>
+                        </div>
+                        <ul>
+                            <li class="pl-5">رنگ: {{ single_product.color }}</li>
+                            <li>برند: {{ single_product.brand }}</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+      <!---------------------------------->
+<div class="container">
+  <div class="row">
+    <div class="col-md-12">
+      <div class="three-slider">
+        <h4>{{ product_home_page1.category.title }}</h4>
+        <div class="owl-carousel owl-theme ov3 owl-rtl">
+          {% for product in product_home1 %}
+            <div class="item">
+              <figure>
+                <a href="{% url 'product_detail' category_slug=product.category.parent.slug subcategory_slug=product.category.slug pk=product.pk %}">
+                  {% thumbnail product.image '400x400' crop="center" as im %}
+                    <img src="{{ im.url }}" width="70px">
+                  {% endthumbnail %}
+                </a>
+              </figure>
+              <h6 class="title-limit">
+                  <i class="fa fa-title"></i>{{ product.title|truncatechars:50 }}
+              </h6>
+                {% if product.has_discount %}
+                    <h6>
+                        <span style="text-decoration: line-through;">{{ product.price|price_format }} تومان</span>
+                        <strong class="f-dark text-danger">{{ product.final_price|price_format }} تومان</strong>
+                    </h6>
+                {% else %}
+                    <h6 class="f-dark text-danger">{{ product.price|price_format }} تومان</h6>
+              {% endif %}
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      <!---------------------------------->
+      <div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="book-baner">
+                {% if banner2 %}
+                    <a href="{{ banner2.url }}">
+                        <img src="{{ banner2.image.url }}" alt="{{ banner2.title }}" class="w-100">
+                    </a>
+                {% endif %}
+                <h4>{{ banner2.title }}</h4>
+            </div>
+        </div>
+    </div>
+</div>
+      <!---------------------------------->
+<div class="container">
+  <div class="row">
+    <div class="col-md-12">
+      <div class="three-slider">
+        <h4>{{ product_home_page2.category.title }}</h4>
+        <div class="owl-carousel owl-theme ov3 owl-rtl">
+          {% for product in product_home2 %}
+            <div class="item">
+              <figure>
+                <a href="{% url 'product_detail' category_slug=product.category.parent.slug subcategory_slug=product.category.slug pk=product.pk %}">
+                  {% thumbnail product.image '400x400' crop="center" as im %}
+                    <img src="{{ im.url }}" width="70px">
+                  {% endthumbnail %}
+                </a>
+              </figure>
+              <h6 class="title-limit">
+                  <i class="fa fa-title"></i>{{ product.title|truncatechars:50 }}
+              </h6>
+                {% if product.has_discount %}
+                    <h6>
+                        <span style="text-decoration: line-through;">{{ product.price|price_format }} تومان</span>
+                        <strong class="f-dark text-danger">{{ product.final_price|price_format }} تومان</strong>
+                    </h6>
+                {% else %}
+                    <h6 class="f-dark text-danger">{{ product.price|price_format }} تومان</h6>
+                {% endif %}
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      <!---------------------------------->
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="book-baner">
+                {% if banner3 %}
+                    <a href="{{ banner3.url }}">
+                        <img src="{{ banner3.image.url }}" alt="{{ banner3.title }}" class="w-100">
+                    </a>
+                {% endif %}
+                <h4>{{ banner3.title }}</h4>
+            </div>
+        </div>
+    </div>
+</div>
+      <!---------------------------------->
+<div class="container">
+  <div class="row">
+    <div class="col-md-12">
+      <div class="three-slider">
+        <h4>محصولات پر بازدید</h4>
+        <div class="owl-carousel owl-theme ov3 owl-rtl">
+          {% for product in visit_products %}
+            <div class="item">
+              <figure>
+                <a href="{% url 'product_detail' category_slug=product.category.parent.slug subcategory_slug=product.category.slug pk=product.pk %}">
+                  {% thumbnail product.image '400x400' crop="center" as im %}
+                    <img src="{{ im.url }}" width="70px">
+                  {% endthumbnail %}
+                </a>
+              </figure>
+              <h6 class="title-limit">
+                  <i class="fa fa-title"></i>{{ product.title|truncatechars:50 }}
+              </h6>
+                {% if product.has_discount %}
+                    <h6>
+                        <span style="text-decoration: line-through;">{{ product.price|price_format }} تومان</span>
+                        <strong class="f-dark text-danger">{{ product.final_price|price_format }} تومان</strong>
+                    </h6>
+                {% else %}
+                    <h6 class="f-dark text-danger">{{ product.price|price_format }} تومان</h6>
+                {% endif %}
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      <!---------------------------------->
+         <div class="pages-bnaer text-center">
+         <div class="container">
+            <span>اخبار و مقالات</span>
+         </div>
+      </div>
+    <div class="container">
+  <div class="row">
+    {% for blog in blogs %}
+      <div class="col-md-3 mb-4">
+        <div class="blog-content p-3 shadow-sm rounded h-100 d-flex flex-column">
+          <figure>
+            {% thumbnail blog.image "300x150" crop="center" as im %}
+              <img class="img-fluid rounded" src="{{ im.url }}">
+            {% endthumbnail %}
+          </figure>
+          <h5 class="mt-2"><i class="fa fa-title"></i> {{ blog.title }}</h5>
+          <p>{{ blog.short_description}}</p>
+          <ul class="list-unstyled small">
+            <li><i class="fa fa-bars"></i> دسته بندی: {{ blog.category }}</li>
+            <li><i class="fa fa-calendar-o"></i> نوشته شده در: {{ blog.created_at }}</li>
+            <li><i class="fa fa-user-o"></i> نویسنده: {{ blog.author }}</li>
+          </ul>
+          <a href="{% url 'blog_detail' blog.id %}" class="btn btn-primary btn-sm mt-auto"><i class="fa fa-continuous t-auto"></i> ادامه مطلب »</a>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+      <!---------------------------------->
+
+</body>
+{% endblock %}

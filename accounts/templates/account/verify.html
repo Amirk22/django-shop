@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block title %}ثبت نام{% endblock %}
+
+{% block content %}
+<div style="max-width:400px; margin:100px auto; background:#fff; padding:30px; border-radius:16px; box-shadow:0 0 10px rgba(0,0,0,0.1);">
+    <div style="text-align:center; font-weight:bold; font-size:22px; margin-bottom:25px;">فعال‌سازی حساب</div>
+
+    <form method="post" novalidate>
+        {% csrf_token %}
+
+        <div class="mb-3">
+            {{ register_active_code_form.code }}
+            {% if register_active_code_form.code.errors %}
+                <div class="text-danger small mt-1">{{ register_active_code_form.code.errors }}</div>
+            {% endif %}
+        </div>
+
+        {% if register_active_code_form.non_field_errors %}
+            <div class="text-danger small mb-2">{{ register_active_code_form.non_field_errors }}</div>
+        {% endif %}
+
+        {% if error %}
+            <div class="alert alert-danger text-center mt-2 py-2">{{ error }}</div>
+        {% endif %}
+        {% if messages %}
+            {% for msg in messages %}
+                <div class="alert alert-{{ msg.tags }} text-center mt-2 py-2">{{ msg }}</div>
+            {% endfor %}
+        {% endif %}
+
+        <button type="submit" class="btn btn-primary w-100"
+            style="border-radius:8px; font-size:16px; padding:10px 0;">
+            تأیید کد فعال‌سازی
+        </button>
+    </form>
+
+    <div style="text-align:center; margin-top:20px;">
+        <form method="post" action="{% url 'resend_code' %}">
+            {% csrf_token %}
+            <button type="submit"
+                class="btn btn-outline-secondary w-100"
+                style="border-radius:8px; font-size:15px; padding:8px 0;">
+                ارسال مجدد کد فعال‌سازی
+            </button>
+        </form>
+        <div style="font-size:13px; color:#666; margin-top:8px;">
+            اگر ایمیلی دریافت نکرده‌اید، می‌توانید کد جدید درخواست کنید.
+        </div>
+    </div>
+</div>
+
+	
+{% endblock %}

@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}404{% endblock %}
+
+{% block content %}
+<style>
+    body { text-align: center; font-family: sans-serif; padding: 50px; }
+    h1 { font-size: 50px; }
+    p { font-size: 20px; }
+    a.btn { text-decoration: none; color: white; }
+</style>
+
+<h1>404</h1>
+<p>صفحه‌ای که دنبال آن بودید پیدا نشد.</p><br>
+
+<a class="btn btn-primary" href="{% url 'home_page' %}">بازگشت به صفحه اصلی</a>
+{% endblock %}

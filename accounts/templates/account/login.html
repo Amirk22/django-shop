@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block title %}ورود{% endblock %}
+
+{% block content %}
+<div style="max-width:400px; margin:100px auto; background:#fff; padding:30px; border-radius:16px; box-shadow:0 0 10px rgba(0,0,0,0.1);">
+    <div style="text-align:center; font-weight:bold; font-size:22px; margin-bottom:20px;">ورود به حساب</div>
+
+    <form method="post" novalidate>
+        {% csrf_token %}
+
+
+        <div class="mb-3">
+            {{ login_form.email }}
+            {% for error in login_form.email.errors %}
+                <div style="color:red; font-size:13px; margin-top:4px;">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+
+        <div class="mb-3">
+            {{ login_form.password }}
+            {% for error in login_form.password.errors %}
+                <div style="color:red; font-size:13px; margin-top:4px;">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        {% if error %}
+            <div style="color:red; font-size:14px; margin:6px 0; text-align:center;">{{ error }}</div>
+        {% endif %}
+
+        <button type="submit" class="btn btn-primary w-100"
+                style="border-radius:8px; font-size:16px; padding:10px 0;">
+            ورود
+        </button>
+    </form>
+
+    <div style="text-align:center; margin-top:15px;">
+        <a href="{% url 'forgot_password' %}"
+           style="font-size:14px; color:#007bff; text-decoration:none;">
+            فراموشی رمز عبور؟
+        </a>
+    </div>
+</div>
+{% endblock %}
