@@ -34,6 +34,8 @@ The Django Rest Framework (DRF) API endpoints are intended to be accessed and te
 ---
 ## Running the Project
 
+##### open docker Desktop
+
 ##### open CMD
 ```bash
 cd Desktop
